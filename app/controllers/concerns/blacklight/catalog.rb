@@ -37,12 +37,12 @@ module Blacklight::Catalog
 
     helper Blacklight::Facet
 
-    # When an action raises Blacklight::Exceptions::RecordNotFound, handle 
+    # When an action raises Blacklight::Exceptions::RecordNotFound, handle
     # the exception appropriately.
-    rescue_from Blacklight::Exceptions::RecordNotFound, with: :invalid_document_id_error
+    rescue_from Blacklight::Exceptions::RecordNotFound, with: ActiveRecord::RecordNotFound
 
     # Deprecated:
-    rescue_from Blacklight::Exceptions::InvalidSolrID, with: :invalid_document_id_error
+    rescue_from Blacklight::Exceptions::InvalidSolrID, with: ActiveRecord::RecordNotFound
 
     record_search_parameters
   end
@@ -132,7 +132,7 @@ module Blacklight::Catalog
 
     ##
     # Check if any search parameters have been set
-    # @return [Boolean] 
+    # @return [Boolean]
     def has_search_parameters?
       !params[:q].blank? or !params[:f].blank? or !params[:search_field].blank?
     end
@@ -207,14 +207,14 @@ module Blacklight::Catalog
     ##
     # Render the document export formats for a response
     # First, try to render an appropriate template (e.g. index.endnote.erb)
-    # If that fails, just concatenate the document export responses with a newline. 
+    # If that fails, just concatenate the document export responses with a newline.
     def render_document_export_format format_name
       render
     rescue ActionView::MissingTemplate
       render text: @response.documents.map { |x| x.export_as(format_name) if x.exports_as? format_name }.compact.join("\n"), layout: false
     end
 
-    # override this method to change the JSON response from #index 
+    # override this method to change the JSON response from #index
     def render_search_results_as_json
       {response: {docs: @document_list, facets: search_facets_as_json, pages: pagination_info(@response)}}
     end
@@ -226,10 +226,10 @@ module Blacklight::Catalog
         f["items"] = f["items"].as_json.each do |i|
           i['label'] ||= i['value']
         end
-      end 
+      end
     end
 
-    # override this method to change the JSON response from #facet 
+    # override this method to change the JSON response from #facet
     def render_facet_list_as_json
       {response: {facets: @pagination }}
     end
@@ -304,44 +304,6 @@ module Blacklight::Catalog
 
       flash[:error].blank?
     end
-
-    ##
-    # when a request for /catalog/BAD_SOLR_ID is made, this method is executed.
-    # Just returns a 404 response, but you can override locally in your own
-    # CatalogController to do something else -- older BL displayed a Catalog#inde
-    # page with a flash message and a 404 status.
-    def invalid_document_id_error *args
-      Deprecation.silence(Blacklight::Catalog) do
-        invalid_solr_id_error *args
-      end
-    end
-
-    ##
-    # DEPRECATED; this method will be removed in Blacklight 6.0 and the functionality
-    # moved to invalid_document_id_error
-    def invalid_solr_id_error(exception)
-      error_info = {
-        "status" => "404",
-        "error"  => "#{exception.class}: #{exception.message}"
-      }
-
-      respond_to do |format|
-        format.xml  { render :xml  => error_info, :status => 404 }
-        format.json { render :json => error_info, :status => 404 }
-
-        # default to HTML response, even for other non-HTML formats we don't
-        # neccesarily know about, seems to be consistent with what Rails4 does
-        # by default with uncaught ActiveRecord::RecordNotFound in production
-        format.any do
-          # use standard, possibly locally overridden, 404.html file. Even for
-          # possibly non-html formats, this is consistent with what Rails does
-          # on raising an ActiveRecord::RecordNotFound. Rails.root IS needed
-          # for it to work under testing, without worrying about CWD.
-          render :file => "#{Rails.root}/public/404.html", :status => 404, :layout => false, :content_type => 'text/html'
-        end
-      end
-    end
-    deprecation_deprecate invalid_solr_id_error: :invalid_document_id_error
 
     def start_new_search_session?
       action_name == "index"
