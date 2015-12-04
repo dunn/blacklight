@@ -37,12 +37,12 @@ module Blacklight::Catalog
 
     helper Blacklight::Facet
 
-    # When an action raises Blacklight::Exceptions::RecordNotFound, handle
-    # the exception appropriately.
-    rescue_from Blacklight::Exceptions::RecordNotFound, with: ActiveRecord::RecordNotFound
+    # # When an action raises Blacklight::Exceptions::RecordNotFound, handle
+    # # the exception appropriately.
+    # rescue_from Blacklight::Exceptions::RecordNotFound, with: ActiveRecord::RecordNotFound
 
-    # Deprecated:
-    rescue_from Blacklight::Exceptions::InvalidSolrID, with: ActiveRecord::RecordNotFound
+    # # Deprecated:
+    # rescue_from Blacklight::Exceptions::InvalidSolrID, with: ActiveRecord::RecordNotFound
 
     record_search_parameters
   end
