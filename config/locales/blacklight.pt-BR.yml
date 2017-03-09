@@ -109,9 +109,9 @@ pt-BR:
           other: 'Itens'
         url: 'URL: %{url}'
         message: 'Mensagem: %{message}'
-      
+
       success: "Email Enviado"
-      
+
       errors:
         to:
           invalid: 'Verifique seu endereço de email'
@@ -140,8 +140,6 @@ pt-BR:
     back_to_bookmarks: 'Voltar aos Favoritos'
 
     search:
-      # i18n key 'title' is deprecated and will be removed in Blacklight 6.0
-      title: '%{application_name} Resultado da Busca'
       page_title:
         title: '%{constraints} - %{application_name} Resultado da Busca'
         constraint: '%{label}: %{value}'
@@ -183,7 +181,7 @@ pt-BR:
         counter: '%{counter}. '
       facets:
         title: 'Filtre sua busca'
-        clear: 'Limpar'  
+        clear: 'Limpar'
         sort:
           count: 'Ordenar por Número'
           index: 'Ordem Alfabética A-Z'
